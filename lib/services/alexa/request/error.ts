@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { ErrorHandler as ErrorHandlerType } from 'ask-sdk';
 
 import { MetricsType } from '@/lib/clients/metrics';
@@ -12,10 +11,10 @@ const ErrorHandlerGenerator = (metrics: MetricsType): ErrorHandlerType => ({
   canHandle: (): boolean => true,
   handle: (input: AlexaHandlerInput, error: Error) => {
     // TODO: fully implement error handler
-
-    log.error(error, input.requestEnvelope.request.type);
-
     const { versionID } = input.context;
+
+    log.error('ERROR versionID=%s, request=%s, error=%s', versionID, input.requestEnvelope.request.type, error);
+
     metrics.error(versionID);
 
     return input.responseBuilder

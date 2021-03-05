@@ -29,11 +29,28 @@ defaults:
       tags:
         only: /^v[0-9]*(\.[0-9]*)*$/
 
+  ignore_dev_env_autorebase_staging_filters:
+    &ignore_dev_env_autorebase_staging_filters
+    branches:
+      ignore:
+        - /rebase-pull-request-.*/
+        - /cherry-pick-rebase-pull-request-.*/
+        - /env-.*/
+        - staging
+
+  slack-fail-post-step: &slack-fail-post-step
+    post-steps:
+      - vfcommon/notify_slack:
+          channel: dev_general
+          event: fail
+          mentions: "@eng_runtime"
+          template: basic_fail_1
+          branch_pattern: master
+
 orbs:
   codecov: codecov/codecov@1.0.2
-  vfcommon: voiceflow/common@0.0.64
+  vfcommon: voiceflow/common@0.0.68
   sonarcloud: sonarsource/sonarcloud@1.0.2
-  validate-title: qventus/validate-title@0.0.4
 
 jobs:
   test:
@@ -98,19 +115,6 @@ jobs:
 
 # When should each job run and what are their dependencies?
 workflows:
-  pr-checker:
-    jobs:
-      - validate-title/validate:
-          context: dev-test
-          regex: >-
-            $PR_REGEX
-          filters:
-            branches:
-              ignore:
-                - /env-.*/
-                - staging
-                - master
-
   # Staging
   build-deploy-staging:
     jobs:
@@ -143,13 +147,13 @@ workflows:
   test-and-release-app:
     jobs:
       - test:
+          <<: *slack-fail-post-step
           context: dev-test
           filters:
-            branches:
-              ignore:
-                - /env-.*/
-                - staging
+            <<: *ignore_dev_env_autorebase_staging_filters
+
       - vfcommon/release:
+          <<: *slack-fail-post-step
           context: dev-test
           requires:
             - test
