@@ -162,6 +162,7 @@ export const DirectiveHandler: HandlerFactory<Node, typeof utilsObj> = (utils) =
             .then((res: any) => {
               console.log(res);
               variables.set(directive.to, res.rows[0][res.fields[0].name]);
+              console.log(`${directive.to} set to ${res.rows[0][res.fields[0].name]} with info ${[res.fields[0].name]}`);
             })
             .catch((error: any) => {
               log.warn(`Custom SQL Fail ${JSON.stringify(directive)}`);

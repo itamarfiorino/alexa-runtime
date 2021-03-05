@@ -33,6 +33,13 @@ export const responseGenerator = (utils: typeof utilsObj) => async (runtime: Ale
   attributesManager.setPersistentAttributes(runtime.getFinalState());
 
   const response = responseBuilder.getResponse();
+  if (response.directives?.[0].type == 'Connections.StartConnection'){
+    console.log("Connection Directive");
+    delete response.shouldEndSession;
+    delete response.outputSpeech;
+    delete response.reprompt;
+  }
+  console.log(response);
 
   const { directives } = response;
   if (Array.isArray(directives)) {

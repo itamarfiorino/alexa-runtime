@@ -14,7 +14,12 @@ const utilsObj = {
 export const EventHandlerGenerator = (utils: typeof utilsObj): RequestHandler => ({
   async canHandle(input: AlexaHandlerInput): Promise<boolean> {
     const runtime = await utils.buildRuntime(input);
-
+    console.log( `Event: ${JSON.stringify(utils)}`);
+    try{
+      console.log( `Against: ${JSON.stringify(runtime)}`);
+    } catch (err) {
+      console.log( `Against: ${runtime}`);
+    }
     return !!utils.getEvent(runtime);
   },
   handle: async (input: AlexaHandlerInput) => {
