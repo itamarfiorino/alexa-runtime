@@ -68,7 +68,10 @@ export const _createReminderObject = (reminder: NodeData['reminder'], variablesM
   );
 
   if (reminder.type === ReminderType.SCHEDULED_ABSOLUTE) {
-    const date = reminder.date && replaceVariables(reminder.date, variablesMap);
+    var date = reminder.date && replaceVariables(reminder.date, variablesMap);
+    console.log(date)
+    date = (date || date == "delete") ?? moment.utc().toISOString(); //Timezone doesnt matter as we don't care about reminding on the day of setReminder.
+    console.log(date)
 
     const time = date?.includes('/') ? moment.utc(date, 'DD/MM/YYYY') : moment.utc(date?.split('T')[0], 'YYYY-MM-DD');
 
@@ -82,6 +85,11 @@ export const _createReminderObject = (reminder: NodeData['reminder'], variablesM
 
     if (reminder.recurrence) {
       reminderObject.trigger.recurrence = reminder.recurrence;
+      console.log(`old: (${JSON.stringify(reminderObject)})`);
+      if ('byDay' in reminderObject.trigger.recurrence) {
+        reminderObject.trigger.recurrence.byDay = [variablesMap.res];
+      }
+      console.log(JSON.stringify(reminderObject));
     }
     if (reminder.timezone !== 'User Timezone') reminderObject.trigger.timeZoneId = reminder.timezone;
   } else {
@@ -116,16 +124,44 @@ export const ReminderHandler: HandlerFactory<Node, typeof utilsObj> = (utils) =>
       if (!apiEndpoint || !apiAccessToken) throw new Error('invalid login token');
 
       const reminderObject = utils._createReminderObject(node.reminder, variables.getState(), runtime.storage.get<string>(S.LOCALE)!);
+      if ( ! node.reminder.date ) {
+        //Delete old reminders
+        await utils.axios.get(`${apiEndpoint}/v1/alerts/reminders`, {
+            headers: {
+              Authorization: `Bearer ${apiAccessToken}`
+            },
+          }).then( async response => {
+            for (let reminder of response.data?.alerts) {
+                console.log(`a reminder: ${reminder}`);
+                await utils.axios.delete(`${apiEndpoint}/v1/alerts/reminders/${reminder.alertToken}`, {
+                    headers: {
+                      Authorization: `Bearer ${apiAccessToken}`,
+                    },
+                  }).catch( _ => {
+                    console.log("One reminder was already deleted manually");
+                  }).then( () => {
+                    console.log("success.");
+                  });
+                }
+          });
+      }
+      if ( node.reminder.date == "delete" ) {
+        console.log("DELETE ONLY");
+        nextId = node.success_id ?? null;
+        return nextId;
+      }
 
-      await utils.axios.post(`${apiEndpoint}/v1/alerts/reminders`, reminderObject, {
+
+      console.log(await utils.axios.post(`${apiEndpoint}/v1/alerts/reminders`, reminderObject, {
         headers: {
           Authorization: `Bearer ${apiAccessToken}`,
           'Content-Type': 'application/json',
         },
-      });
+      }));
 
       nextId = node.success_id ?? null;
     } catch (err) {
+      console.log(err);
       nextId = node.fail_id ?? null;
     }
 

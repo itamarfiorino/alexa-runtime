@@ -27,7 +27,8 @@ const buildRuntime = async (input: AlexaHandlerInput) => {
   runtime.turn.set(T.HANDLER_INPUT, input);
   runtime.turn.set(T.PREVIOUS_OUTPUT, runtime.storage.get(S.OUTPUT));
   runtime.storage.set(S.OUTPUT, '');
-  runtime.storage.set(S.ACCESS_TOKEN, requestEnvelope.context.System.user.accessToken);
+//  console.log(requestEnvelope.context.System.person?.accessToken);
+  runtime.storage.set(S.ACCESS_TOKEN, requestEnvelope.context.System.person?.accessToken);
 
   runtime.variables.set(V.RESPONSE, null);
 
