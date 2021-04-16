@@ -69,9 +69,10 @@ export const _createReminderObject = (reminder: NodeData['reminder'], variablesM
 
   if (reminder.type === ReminderType.SCHEDULED_ABSOLUTE) {
     var date = reminder.date && replaceVariables(reminder.date, variablesMap);
-    console.log(date)
-    date = (date || date == "delete") ?? moment.utc().toISOString(); //Timezone doesnt matter as we don't care about reminding on the day of setReminder.
-    console.log(date)
+    //console.log(date)
+    date = date ?? moment.utc().toISOString(); //Timezone doesnt matter as we don't care about reminding on the day of setReminder.
+    if (date == "delete") date = moment.utc().toISOString();
+    //console.log(date)
 
     const time = date?.includes('/') ? moment.utc(date, 'DD/MM/YYYY') : moment.utc(date?.split('T')[0], 'YYYY-MM-DD');
 
@@ -85,11 +86,11 @@ export const _createReminderObject = (reminder: NodeData['reminder'], variablesM
 
     if (reminder.recurrence) {
       reminderObject.trigger.recurrence = reminder.recurrence;
-      console.log(`old: (${JSON.stringify(reminderObject)})`);
+      //console.log(`old: (${JSON.stringify(reminderObject)})`);
       if ('byDay' in reminderObject.trigger.recurrence) {
         reminderObject.trigger.recurrence.byDay = [variablesMap.res];
       }
-      console.log(JSON.stringify(reminderObject));
+      //console.log(JSON.stringify(reminderObject));
     }
     if (reminder.timezone !== 'User Timezone') reminderObject.trigger.timeZoneId = reminder.timezone;
   } else {
