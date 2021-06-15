@@ -29,7 +29,15 @@ class AlexaController extends AbstractController {
       runtimeClient,
     };
 
-    return alexa.skill.invoke(req.body, alexaContext);
+    console.log('REQUEST');
+    console.log(req.body.request);
+    console.log('PERSON', req.body.context?.System?.person);
+
+    const response = await alexa.skill.invoke(req.body, alexaContext);
+
+    console.log('RESPONSE');
+    console.log(response.response);
+    return response;
   }
 }
 

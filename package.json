@@ -137,7 +137,7 @@
     "lint:fix": "yarn lint --fix",
     "lint:quiet": "yarn lint --quiet",
     "lint:report": "yarn lint --format json -o sonar/report.json",
-    "local": "rm -f .env.local && vfcli mesh connect alexa-runtime",
+    "local": "yarn start:meshed",
     "start": "NODE_ENV=production node --max-old-space-size=8192 build/start.js",
     "start:meshed": "NODE_ENV=local ts-node-dev --files --respawn --exit-child --transpile-only -r tsconfig-paths/register -- start.ts",
     "test": "yarn test:run",
